@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Árbol Binario de Búsqueda</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      canvas {
+        border: 1px solid #ddd;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Árbol Binario de Búsqueda</h1>
+      <label for="value">Ingrese un valor:</label>
+      <input type="text" id="value" />
+      <button onclick="insertValue()">Insertar</button>
+      <button onclick="searchValue()">Buscar</button>
+      <canvas id="treeCanvas" width="800" height="600"></canvas>
+    </div>
+    <script>
+      class TreeNode {
+        constructor(key) {
+          this.left = null;
+          this.right = null;
+          this.val = key;
+        }
+      }
+
+      function insert(root, key) {
+        if (root === null) {
+          return new TreeNode(key);
+        } else {
+          if (root.val < key) {
+            root.right = insert(root.right, key);
+          } else {
+            root.left = insert(root.left, key);
+          }
+        }
+        return root;
+      }
+
+      function search(root, key) {
+        if (root === null || root.val === key) {
+          return root;
+        }
+        if (root.val < key) {
+          return search(root.right, key);
+        }
+        return search(root.left, key);
+      }
+
+      let tree = null;
+
+      function insertValue() {
+        const value = document.getElementById("value").value;
+        if (!isNaN(value) && value.trim() !== "") {
+          tree = insert(tree, parseInt(value));
+          alert(`Valor ${value} insertado en el árbol.`);
+          drawTree();
+        } else {
+          alert("Ingrese un valor numérico.");
+        }
+      }
+
+      function searchValue() {
+        const value = document.getElementById("value").value;
+        if (!isNaN(value) && value.trim() !== "") {
+          const result = search(tree, parseInt(value));
+          if (result) {
+            alert(`Valor ${value} encontrado en el árbol.`);
+          } else {
+            alert(`Valor ${value} no encontrado en el árbol.`);
+          }
+        } else {
+          alert("Ingrese un valor numérico.");
+        }
+      }
+
+      function drawTree() {
+        const canvas = document.getElementById("treeCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (tree) {
+          drawNode(tree, 400, 30, 200, ctx);
+        }
+      }
+
+      function drawNode(node, x, y, dx, ctx) {
+        if (node) {
+          ctx.beginPath();
+          ctx.arc(x, y, 20, 0, 2 * Math.PI, false);
+          ctx.fillStyle = "lightblue";
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.font = "12px Arial";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "black";
+          ctx.fillText(node.val, x, y + 4);
+
+          if (node.left) {
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y + 20);
+            ctx.lineTo(x - dx + 20, y + 80 - 20);
+            ctx.stroke();
+            drawNode(node.left, x - dx, y + 80, dx / 2, ctx);
+          }
+          if (node.right) {
+            ctx.beginPath();
+            ctx.moveTo(x + 20, y + 20);
+            ctx.lineTo(x + dx - 20, y + 80 - 20);
+            ctx.stroke();
+            drawNode(node.right, x + dx, y + 80, dx / 2, ctx);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

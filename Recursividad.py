@@ -64,7 +64,10 @@ def maximoLista(lista):
         return lista[0]
     else:
         maximoNumero = maximoLista(lista[1:])
-        return lista[0] if lista[0] > maximoNumero else maximoNumero
+        if lista[0] > maximoNumero:
+            return lista[0]
+        else:
+            return maximoNumero
 
 #MAIN PRINCIPAL
 #print(fibonacci(11))
