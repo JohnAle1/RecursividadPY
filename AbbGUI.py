@@ -1,88 +1,91 @@
 import tkinter as tk
-from tkinter import messagebox
 
-class TreeNode:
-    def __init__(self, key):
-        self.left = None
-        self.right = None
-        self.val = key
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izquierda = None
+        self.derecha = None
 
-def insert(root, key):
-    if root is None:
-        return TreeNode(key)
-    else:
-        if root.val < key:
-            root.right = insert(root.right, key)
+class ArbolBinario:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        if self.raiz is None:
+            self.raiz = Nodo(valor)
         else:
-            root.left = insert(root.left, key)
-    return root
+            self._insertar_recursivo(self.raiz, valor)
 
-def search(root, key):
-    if root is None or root.val == key:
-        return root
-    if root.val < key:
-        return search(root.right, key)
-    return search(root.left, key)
+    def _insertar_recursivo(self, nodo, valor):
+        if valor < nodo.valor:
+            if nodo.izquierda is None:
+                nodo.izquierda = Nodo(valor)
+            else:
+                self._insertar_recursivo(nodo.izquierda, valor)
+        else:
+            if nodo.derecha is None:
+                nodo.derecha = Nodo(valor)
+            else:
+                self._insertar_recursivo(nodo.derecha, valor)
 
-class BSTApp:
+    def buscar(self, valor):
+        return self._buscar_recursivo(self.raiz, valor)
+
+    def _buscar_recursivo(self, nodo, valor):
+        if nodo is None or nodo.valor == valor:
+            return nodo
+        if valor < nodo.valor:
+            return self._buscar_recursivo(nodo.izquierda, valor)
+        else:
+            return self._buscar_recursivo(nodo.derecha, valor)
+
+class App:
     def __init__(self, root):
         self.root = root
-        self.tree = None
-
-        self.root.title("Árbol Binario de Búsqueda")
-
-        self.label = tk.Label(root, text="Ingrese un valor:")
-        self.label.pack()
-
-        self.entry = tk.Entry(root)
-        self.entry.pack()
-
-        self.insert_button = tk.Button(root, text="Insertar", command=self.insert_value)
-        self.insert_button.pack()
-
-        self.search_button = tk.Button(root, text="Buscar", command=self.search_value)
-        self.search_button.pack()
-
-        self.canvas = tk.Canvas(root, width=800, height=600, bg="white")
+        self.root.title("GUI Arbol Binario")
+        
+        self.frame = tk.Frame(self.root)
+        self.frame.pack(pady=10)
+        
+        self.label = tk.Label(self.frame, text="Ingrese un valor: ")
+        self.label.pack(side=tk.LEFT, padx=10)
+        
+        self.entry = tk.Entry(self.frame)
+        self.entry.pack(side=tk.LEFT, padx=10)
+        
+        self.button = tk.Button(self.frame, text="Agregar Nodo", command=self.insertar_valor)
+        self.button.pack(side=tk.LEFT, padx=10)
+        
+        self.canvas = tk.Canvas(self.root, width=800, height=600, bg="white")
         self.canvas.pack()
+        
+        self.arbol = ArbolBinario()
 
-    def insert_value(self):
-        value = self.entry.get()
-        if value.isdigit():
-            self.tree = insert(self.tree, int(value))
-            messagebox.showinfo("Insertar", f"Valor {value} insertado en el árbol.")
-            self.draw_tree()
-        else:
-            messagebox.showwarning("Advertencia", "Ingrese un valor numérico.")
+    def insertar_valor(self):
+        try:
+            valor = int(self.entry.get())
+            self.arbol.insertar(valor)
+            self.entry.delete(0, tk.END)
+            self.dibujar_arbol()
+        except ValueError:
+            print("Por favor, ingrese un valor numérico válido.")
 
-    def search_value(self):
-        value = self.entry.get()
-        if value.isdigit():
-            result = search(self.tree, int(value))
-            if result:
-                messagebox.showinfo("Buscar", f"Valor {value} encontrado en el árbol.")
-            else:
-                messagebox.showinfo("Buscar", f"Valor {value} no encontrado en el árbol.")
-        else:
-            messagebox.showwarning("Advertencia", "Ingrese un valor numérico.")
-
-    def draw_tree(self):
+    def dibujar_arbol(self):
         self.canvas.delete("all")
-        if self.tree:
-            self._draw_node(self.tree, 400, 30, 200)
+        if self.arbol.raiz is not None:
+            self._dibujar_nodo(self.arbol.raiz, 400, 50, 100)
 
-    def _draw_node(self, node, x, y, dx):
-        if node:
-            self.canvas.create_oval(x-20, y-20, x+20, y+20, fill="lightblue")
-            self.canvas.create_text(x, y, text=str(node.val), font=("Arial", 12, "bold"))
-            if node.left:
-                self.canvas.create_line(x-20, y+20, x-dx+20, y+80-20)
-                self._draw_node(node.left, x-dx, y+80, dx//2)
-            if node.right:
-                self.canvas.create_line(x+20, y+20, x+dx-20, y+80-20)
-                self._draw_node(node.right, x+dx, y+80, dx//2)
+    def _dibujar_nodo(self, nodo, x, y, espacio):
+        if nodo.izquierda is not None:
+            self.canvas.create_line(x, y, x - espacio, y + 50)
+            self._dibujar_nodo(nodo.izquierda, x - espacio, y + 50, espacio / 2)
+        if nodo.derecha is not None:
+            self.canvas.create_line(x, y, x + espacio, y + 50)
+            self._dibujar_nodo(nodo.derecha, x + espacio, y + 50, espacio / 2)
+        self.canvas.create_oval(x - 20, y - 20, x + 20, y + 20, fill="pink")
+        self.canvas.create_text(x, y, text=str(nodo.valor), font=("Arial", 12))
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = BSTApp(root)
+    app = App(root)
     root.mainloop()
